@@ -59,7 +59,7 @@ app.get('/login', function(req, res) {
 app.get('/callback', function(req, res) {
 
     const code = req.query.code || null;
-    const state = req.query.code || null;
+    const state = req.query.state || null;
     const error = req.query.error;
 
     if(error) {
@@ -70,7 +70,11 @@ app.get('/callback', function(req, res) {
         return res.status(400).send('Invalid request: Missing state or code.')
     }
 
-    
+    console.log('Authorization Code:', code);
+    console.log('State:', state);
+
+    // Simple success message
+    res.send('You are connected to Spotify! Code received. Check your terminal.');    
 });
 
   
