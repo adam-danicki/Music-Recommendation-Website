@@ -1,0 +1,28 @@
+.track-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.track-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  margin-right: 12px;
+}
+
+.track-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.track-name {
+  font-weight: bold;
+}
+
+.track-artist {
+  font-size: 0.9em;
+  color: #555;
+}
