@@ -58,7 +58,7 @@ async function handleSearch(req, res) {
                 q: query,
                 type: 'track',
                 limit: 10,
-                offset: 10
+                offset: 0
             }
         });
 
@@ -79,20 +79,20 @@ async function handleSearch(req, res) {
 }
 
 //==================================================//
-//  Function: Handle search
+//  Function: Handle recommendations
 //==================================================//
 async function handleRecommendations(req, res) {
-    const { trackIDs} = req.query;
+    const { trackIDs, userToken } = req.query;
 
-    if(!trackIDs) {
-        return res.status(400).json({ error: 'Missing track_ids parameter' });
+    if (!trackIDs) {
+        return res.status(400).json({ error: 'Missing trackIDs parameter' });
     }
 
-    const accessToken = await getAppAccessToken();
-    if (!accessToken) {
-        return res.status(500).json({ error: 'Unable to authenticate with Spotify' });
+    if (!userToken) {
+        return res.status(401).json({ error: 'Missing user access token' });
     }
-    
+
+    const accessToken = userToken;
     const trackIdArray = trackIDs.split(',').slice(0, 5);
 
     try {
