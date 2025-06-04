@@ -1,0 +1,95 @@
+.list-wrapper {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+}
+
+.song-list {
+  list-style: none;
+  padding: 10px;
+  border: 1px solid #ccc;
+  width: 450px;
+  height: 500px;
+  overflow-y: auto;     
+  background-color: #fafafa;
+}
+
+.list-item:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+/* Pop up modal */
+.limit-warning {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fb3640e7;
+  padding: 10px 40px;
+  width: 400px;
+  text-align: center;
+  border-radius: 20px;
+  box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.317);
+}
+
+.limit-warning-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #f8f7f25d;
+}
+
+.limit-warning h2 {
+  color: #f8f7f2; /* white or any bold title color */
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+.limit-warning p {
+  color: #f8f7f2; /* slightly off-white for contrast */
+  font-size: 1.0rem;
+  margin-bottom: 20px;
+}
+
+/* Track item stylesheets */
+.track-item {
+  display: flex;
+  align-items: center;
+  height: 80px;  
+  padding: 5px;
+  border: 1px solid #ddd;
+  max-width: 100%;
+  cursor: grab;
+}
+
+.track-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  margin-right: 12px;
+}
+
+.track-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.track-name {
+  font-weight: 600;
+}
+
+.track-artist {
+  font-size: 0.9em;
+  color: #5e5e5e;
+}
+
+.delete-button {
+  margin-left: auto;
+  margin-top: auto;
+  color: rgb(167, 0, 0);
+  font-size: 0.5rem;
+  cursor: pointer;
+}
+
