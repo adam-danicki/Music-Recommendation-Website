@@ -17,14 +17,30 @@ dotenv.config();
 const app = express();
 
 // Apply middleware
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
+
 app.use(express.json());
+
+app.use(require('express-session')({
+    secret: 'your-secret-key', 
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        secure: false,         
+        maxAge: 3600000          
+    }
+}));
+
 
 // Constants for user
 const PORT = 3001;
 const clientID = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 const redirectURI = 'http://localhost:3001/callback';
+const session = require('express-session');
 
 
 //==================================================//
@@ -33,6 +49,7 @@ const redirectURI = 'http://localhost:3001/callback';
 function generateRandomState(length) {
     return crypto.randomBytes(length).toString('hex');
 }
+
 
 //==================================================//
 //  Function: Handle search
@@ -78,22 +95,29 @@ async function handleSearch(req, res) {
     }
 }
 
+
 //==================================================//
 //  Function: Handle recommendations
 //==================================================//
 async function handleRecommendations(req, res) {
-    const { trackIDs, userToken } = req.query;
+    console.log("Session on /recommendations:", req.session); //DEBUG
+    const { trackIDs } = req.query;
+    const accessToken = req.session.access_token;
+
 
     if (!trackIDs) {
         return res.status(400).json({ error: 'Missing trackIDs parameter' });
     }
 
-    if (!userToken) {
-        return res.status(401).json({ error: 'Missing user access token' });
+    if (!accessToken) {
+        return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    const accessToken = userToken;
     const trackIdArray = trackIDs.split(',').slice(0, 5);
+
+    //DEBUG
+    console.log("Calling Spotify API with token:", accessToken);
+    console.log("Track IDs:", trackIdArray);
 
     try {
         const featuresResponse = await axios.get('https://api.spotify.com/v1/audio-features', {
@@ -219,7 +243,7 @@ async function handleRecommendations(req, res) {
 //==================================================//
 function handleLogin(req, res) {
     const state = generateRandomState(16);
-    const scope = 'user-read-private user-read-email user-top-read' //define permissions
+    const scope = 'user-read-private user-read-email user-top-read user-library-read user-read-playback-position streaming user-read-recently-played';
 
     // Spotify authorization URL
     res.redirect('https://accounts.spotify.com/authorize?' +
@@ -269,12 +293,9 @@ async function handleCallback(req, res) {
 
         const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
-        // Send tokens to frontend or use for further requests
-        res.json({
-            access_token,
-            refresh_token,
-            expires_in
-        });
+        req.session.access_token = access_token;
+
+        res.redirect(`http://localhost:5173/search`);
         
     } catch (err) {
         console.error('Error exchanging code for tokens:', err.message);
