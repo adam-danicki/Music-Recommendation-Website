@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import TrackItem from './TrackItem';
 
-function GeneratedPlaylist() {
+function Playlist() {
     const { state } = useLocation();
     const tracks = state?.recommendedTracks || [];
     
@@ -24,4 +24,4 @@ function GeneratedPlaylist() {
     );
   }
 
-export default GeneratedPlaylist;
+export default Playlist;

@@ -5,9 +5,9 @@ import Modal from 'react-modal';
 import SearchBar from "./SearchBar";
 import SearchResultsList from "./SearchResultsList";
 import SelectedTracksList from "./SelectedTracksList";
-import  './DragDropInterface.css'
+import  './SearchPage.css'
 
-function DragDropInterface() {
+function SearchPage() {
     const [searchResults, setSearchResults] = useState([]);
     const [selectedTracks, setSelectedTracks] = useState([]);
     const [showLimitWarning, setShowLimitWarning] = useState(false);
@@ -47,15 +47,17 @@ function DragDropInterface() {
     };
 
     const handleGeneratePlaylist = async () => {
-        console.log('Generate button clicked'); // DEBUG
+        console.log('Generate button clicked');
         
         const ids = selectedTracks.map(t => t.id).join(',');
 
         try {
-            const res = await axios.get(`http://localhost:3001/recommendations?trackIDs=${ids}`);
+            const res = await axios.get(`http://localhost:3001/recommendations?trackIDs=${ids}`, {
+                withCredentials: true
+            });
             const recommendedTracks = res.data.recommendations;
 
-            navigate('/generatePlaylist', { state: { recommendedTracks } });
+            navigate('/playlist', { state: { recommendedTracks } });
         } catch (err) {
             console.error('Failed to generate playlist:', err);
         }
@@ -95,4 +97,4 @@ function DragDropInterface() {
     );
 }
 
-export default DragDropInterface;
+export default SearchPage;
