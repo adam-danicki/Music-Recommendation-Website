@@ -243,7 +243,17 @@ async function handleRecommendations(req, res) {
 //==================================================//
 function handleLogin(req, res) {
     const state = generateRandomState(16);
-    const scope = 'user-read-private user-read-email user-top-read user-library-read user-read-playback-position streaming user-read-recently-played';
+    const scope = [
+        'user-read-private',
+        'user-read-email',
+        'user-top-read',
+        'user-library-read',
+        'user-read-playback-position',
+        'streaming',
+        'user-read-recently-played',
+        'playlist-modify-public',
+        'playlist-modify-private'
+    ].join(' ');
 
     // Spotify authorization URL
     res.redirect('https://accounts.spotify.com/authorize?' +
@@ -329,6 +339,68 @@ async function getAppAccessToken() {
 
 
 //==================================================//
+//  Function: Get App Access Token
+//==================================================//
+async function handleCreatePlaylist(req, res) {
+    const accessToken = req.session.access_token;
+    if (!accessToken) {
+        return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const { name, trackURIs } = req.body;
+    if (!name) {
+        return res.status(400).json({ error: 'Missing playlist name' });
+    }
+    if (!Array.isArray(trackURIs) || trackURIs.length === 0) {
+        return res.status(400).json({ error: 'No tracks provided' });
+    }
+
+    try {
+    // 3) Fetch the current user’s Spotify profile to get their user ID
+        const meResp = await axios.get('https://api.spotify.com/v1/me', {
+            headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const userID = meResp.data.id;
+
+        const createResp = await axios.post(
+            `https://api.spotify.com/v1/users/${userID}/playlists`,
+            {
+                name,
+                description: 'Created with Music Finder',
+                public: false
+            },
+            {
+                headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+                }
+            }
+        );
+        const playlistID = createResp.data.id;
+
+        await axios.post(
+            `https://api.spotify.com/v1/playlists/${playlistID}/tracks`,
+            { uris: trackURIs },
+            {
+                headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        res.json({
+            success: true,
+            playlistUrl: createResp.data.external_urls.spotify
+        });
+
+    } catch (err) {
+        console.error('handleCreatePlaylist error:', err.response?.data || err.message);
+        res.status(500).json({ error: 'Failed to create playlist' });
+    }
+}
+
+//==================================================//
 //  Route: Search
 //==================================================//
 app.get('/search', handleSearch);
@@ -351,6 +423,11 @@ app.get('/callback', handleCallback);
 //==================================================//
 app.get('/recommendations', handleRecommendations);
 
+
+//==================================================//
+//  Route: Recommendations
+//==================================================//
+app.post('/create-playlist', handleCreatePlaylist);
 
 // test if server can run + login
 app.listen(PORT, () => {

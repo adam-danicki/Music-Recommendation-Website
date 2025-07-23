@@ -28,7 +28,7 @@ function SelectedTracksList({tracks, onDropTrack, onDeleteTrack, onGeneratePlayl
             className='generate-button'
             onClick={onGeneratePlaylist}
             >
-                Generate Playlist</button>
+                Save Playlist</button>
         </div>
     )
 }

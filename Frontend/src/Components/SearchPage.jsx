@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { useState } from "react";
 import axios from 'axios'
 import Modal from 'react-modal';
@@ -11,7 +10,6 @@ function SearchPage() {
     const [searchResults, setSearchResults] = useState([]);
     const [selectedTracks, setSelectedTracks] = useState([]);
     const [showLimitWarning, setShowLimitWarning] = useState(false);
-    const navigate = useNavigate();
 
     const handleSearch = async (query) => {
         try {
@@ -46,22 +44,35 @@ function SearchPage() {
         }
     };
 
-    const handleGeneratePlaylist = async () => {
-        console.log('Generate button clicked');
-        
-        const ids = selectedTracks.map(t => t.id).join(',');
-
-        try {
-            const res = await axios.get(`http://localhost:3001/recommendations?trackIDs=${ids}`, {
-                withCredentials: true
-            });
-            const recommendedTracks = res.data.recommendations;
-
-            navigate('/playlist', { state: { recommendedTracks } });
-        } catch (err) {
-            console.error('Failed to generate playlist:', err);
+    const handleSavePlaylist = async () => {
+        if (!selectedTracks.length) {
+            alert('Select at least one track first!');
+            return;
         }
-};
+
+        const name = window.prompt('Name your new playlist:', 'My Playlist');
+        if (!name) return;
+
+        const trackURIs = selectedTracks.map(t => t.uri);
+        try {
+            const res = await axios.post(
+                'http://localhost:3001/create-playlist',
+                { name, trackURIs },
+                { withCredentials: true }
+            );
+            
+            if (res.data.success) {
+                window.open(res.data.playlistUrl, '_blank');
+                setSelectedTracks([]);            
+                setShowLimitWarning(false);
+            } else {
+                alert('Failed to create playlist');
+            }
+        } catch (err) {
+                console.error('Save playlist error: ', err);
+                alert('Error creating playlist -- see console');
+        }
+    };
 
     return (
         <>
@@ -89,7 +100,7 @@ function SearchPage() {
                     tracks={selectedTracks} 
                     onDropTrack={handleDropTrack}
                     onDeleteTrack={handleDeleteTrack}
-                    onGeneratePlaylist={handleGeneratePlaylist}
+                    onGeneratePlaylist={handleSavePlaylist}
                     />
                 </div>
             </div>
